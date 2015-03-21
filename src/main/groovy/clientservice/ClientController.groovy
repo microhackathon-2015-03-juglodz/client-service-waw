@@ -36,10 +36,12 @@ class ClientController {
     ServiceRestClient serviceRestClient;
     @Autowired
     MetricRegistry metricRegistry;
-    Counter clientsNumber = metricRegistry.counter("clients.number")
+
+
 
     @RequestMapping(value = "/api/client", method = POST, consumes = "application/json", produces = "application/json")
     ResponseEntity<Client> registerClient(@RequestBody Client client) {
+        Counter clientsNumber = metricRegistry?.counter("clients.number")
         clientsNumber.inc();
         String returned=serviceRestClient.forService("reporter")
                 .post()
