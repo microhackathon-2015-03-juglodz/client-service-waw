@@ -2,8 +2,8 @@
     "waw": {
         "this": "com/ofg/client-service-waw",
         "dependencies": {
-            "collerator": {
-                "path": "com/ofg/some-other-service"
+            "reporter": {
+                "path": "com/ofg/reporting-service-waw"
             }
         }
     }

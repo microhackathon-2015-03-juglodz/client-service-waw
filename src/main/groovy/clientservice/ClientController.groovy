@@ -1,9 +1,14 @@
 package clientservice
 
+import com.netflix.hystrix.HystrixCommand
+import com.ofg.infrastructure.web.resttemplate.fluent.ServiceRestClient
+
 import com.wordnik.swagger.annotations.Api
 import com.wordnik.swagger.annotations.ApiOperation
+import groovy.json.JsonBuilder
 import groovy.transform.TypeChecked
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -24,10 +29,21 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST
 @RestController
 @TypeChecked
 class ClientController {
+    @Autowired
+    ServiceRestClient serviceRestClient;
 
     @RequestMapping(value = "/api/client", method = POST, consumes = "application/json")
     ResponseEntity<Client> registerClient(@RequestBody Client client) {
 
+        serviceRestClient.forService("reporter")
+                .post()
+                .withCircuitBreaker(
+                HystrixCommand.Setter.withGroupKey({ 'group_key' }),
+                { 'Failed' })
+                .onUrl('/api/client')
+                .body(new JsonBuilder(client).toPrettyString())
+                .withHeaders().contentTypeJson()
+                .andExecuteFor().anObject().ofType(String)
 
         return new ResponseEntity<Client>(client, HttpStatus.OK)
 
