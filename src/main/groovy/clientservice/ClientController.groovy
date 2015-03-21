@@ -1,5 +1,7 @@
 package clientservice
 
+import com.codahale.metrics.Counter
+import com.codahale.metrics.MetricRegistry
 import com.netflix.hystrix.HystrixCommand
 import com.ofg.infrastructure.web.resttemplate.fluent.ServiceRestClient
 
@@ -32,11 +34,13 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST
 class ClientController {
     @Autowired
     ServiceRestClient serviceRestClient;
-
+    @Autowired
+    MetricRegistry metricRegistry;
+    Counter clientsNumber = metricRegistry.counter("clients.number")
 
     @RequestMapping(value = "/api/client", method = POST, consumes = "application/json", produces = "application/json")
     ResponseEntity<Client> registerClient(@RequestBody Client client) {
-
+        clientsNumber.inc();
         String returned=serviceRestClient.forService("reporter")
                 .post()
                 .withCircuitBreaker(
