@@ -7,6 +7,7 @@ import com.wordnik.swagger.annotations.Api
 import com.wordnik.swagger.annotations.ApiOperation
 import groovy.json.JsonBuilder
 import groovy.transform.TypeChecked
+import groovy.util.logging.Log
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -32,10 +33,11 @@ class ClientController {
     @Autowired
     ServiceRestClient serviceRestClient;
 
-    @RequestMapping(value = "/api/client", method = POST, consumes = "application/json")
+
+    @RequestMapping(value = "/api/client", method = POST, consumes = "application/json", produces = "application/json")
     ResponseEntity<Client> registerClient(@RequestBody Client client) {
 
-        serviceRestClient.forService("reporter")
+        String returned=serviceRestClient.forService("reporter")
                 .post()
                 .withCircuitBreaker(
                 HystrixCommand.Setter.withGroupKey({ 'group_key' }),
