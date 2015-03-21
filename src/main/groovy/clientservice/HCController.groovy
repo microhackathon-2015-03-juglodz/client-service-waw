@@ -20,6 +20,7 @@ class HCController {
             value = '/hc',
             method = GET)
     String healthCheck() {
+        log.error "HC"
         return "1"
     }
 

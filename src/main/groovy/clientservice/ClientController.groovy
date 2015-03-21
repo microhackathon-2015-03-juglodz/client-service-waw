@@ -11,6 +11,7 @@ import groovy.json.JsonBuilder
 import groovy.transform.TypeChecked
 import groovy.util.logging.Log
 import groovy.util.logging.Slf4j
+import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -37,13 +38,12 @@ class ClientController {
     @Autowired
     MetricRegistry metricRegistry;
 
-
-
     @RequestMapping(value = "/api/client", method = POST, consumes = "application/json", produces = "application/json")
     ResponseEntity<Client> registerClient(@RequestBody Client client) {
         Counter clientsNumber = metricRegistry?.counter("clients.number")
         clientsNumber.inc();
-        String returned=serviceRestClient.forService("reporter")
+        log.info "clients number " + clientsNumber.count
+        String returned = serviceRestClient.forService("reporter")
                 .post()
                 .withCircuitBreaker(
                 HystrixCommand.Setter.withGroupKey({ 'group_key' }),
@@ -52,7 +52,7 @@ class ClientController {
                 .body(new JsonBuilder(client).toPrettyString())
                 .withHeaders().contentTypeJson()
                 .andExecuteFor().anObject().ofType(String)
-
+        log.info "reporter return "+returned
         return new ResponseEntity<Client>(client, HttpStatus.OK)
 
     }
